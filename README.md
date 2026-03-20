@@ -12,7 +12,7 @@ The Rare Disease Knowledge Graph (RDKG) is a FAIR-compliant semantic resource th
 
 | Component | Count | Source |
 |-----------|-------|--------|
-| **Rare Disorders** | 11,074 | ORDO, Mondo, GARD, NORD, MAxO |
+| **Rare Disorders** | 20,074 | ORDO, Mondo, GARD, NORD, MAxO |
 | **Genes** | 4,485 | HGNC |
 | **Phenotypes** | 8,600 | HPO |
 | **RDF Triples** | 220,000 | Blazegraph |
