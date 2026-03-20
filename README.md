@@ -38,7 +38,7 @@ open http://localhost:9999/blazegraph/
 
 ```bash
 # Clone repository
-git clone https://github.com/UTHealth-SBMI/rare-disease-kg.git
+git clone https://github.com/wangjl99/rdkg.git
 cd rare-disease-kg
 
 # Install dependencies
