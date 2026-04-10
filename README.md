@@ -1,359 +1,267 @@
-Rare Disease Knowledge Graph (RDKG)
-📊 Overview**
+# RDKG Rare Disease Knowledge Graph
 
-The Rare Disease Knowledge Graph (RDKG) is a FAIR-compliant semantic resource that harmonizes data from multiple authoritative sources to support:
+A comprehensive, semantically integrated knowledge graph for rare disease research, combining data from Orphanet, MONDO, HPO, DrugBank, ClinVar, and MAXO ontologies.
 
-- recision diagnosis through phenotype-driven similarity search
-- Drug repurposing via integrated chemical-disease relationships
-- Clinical trial matching using structured eligibility criteria
-- Gene prioritization for rare disease genomics
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Neo4j](https://img.shields.io/badge/Neo4j-5.15.0-blue.svg)](https://neo4j.com/)
+[![Biolink](https://img.shields.io/badge/Biolink-Model-green.svg)](https://biolink.github.io/biolink-model/)
 
-### **Quick Stats**
+## 🎯 Overview
 
-| Component | Count | Source |
-|-----------|-------|--------|
-| **Rare Disorders** | 20,074 | ORDO, Mondo, GARD, NORD, MAxO |
-| **Genes** | 4,485 | HGNC |
-| **Phenotypes** | 8,600 | HPO |
-| **RDF Triples** | 220,000 | Blazegraph |
-| **Relationships** | 1,757 | LLM-extracted + Curated |
-| **Drugs** | 2,000+ | DrugBank, CTD, MeSH → PubChem |
+This knowledge graph integrates multiple rare disease data sources into a unified, queryable resource supporting both graph database (Neo4j/Cypher) and semantic web (RDF/SPARQL) access patterns.
 
----
+### Key Features
 
-## 🚀 **Quick Start**
+- **Comprehensive Coverage**: 72,368 biomedical entities across 6 entity types
+- **Rich Relationships**: 834,260 semantically typed relationships
+- **Multi-Access**: Both Neo4j (Cypher) and Apache Jena Fuseki (SPARQL) endpoints
+- **Biolink Compliant**: Follows Biolink Model standards for interoperability
+- **Quality Assured**: No duplicates, verified relationship directions, standardized types
 
-### **Option 1: Docker (Recommended)**
+## 📊 Statistics
 
-```bash
-# Pull and run the RDKG container
-docker pull uthouston/rdkg:latest
-docker run -d -p 9999:9999 --name rdkg uthouston/rdkg:latest
+| Category | Count |
+|----------|-------|
+| **Total Entities** | 72,368 |
+| **Diseases** | 26,106 |
+| **Drugs** | 16,875 |
+| **Phenotypes** | 11,708 |
+| **Genes** | 9,326 |
+| **Variants** | 7,367 |
+| **Treatments** | 455 |
+| **Total Relationships** | 834,260 |
+| **RDF Triples** | 1,181,391 |
 
-# Access SPARQL endpoint
-open http://localhost:9999/blazegraph/
-```
+### Relationship Types
 
-### **Option 2: Local Installation**
+| Relationship | Count | Description |
+|-------------|--------|-------------|
+| `has_phenotype` | 328,753 | Disease → Phenotype associations |
+| `related_to` | 225,579 | General disease relationships |
+| `subclass_of` | 142,047 | Disease hierarchy |
+| `treats` (Drug) | 38,588 | Drug treatments |
+| `treats` (Procedure) | 455 | Medical procedures (MAXO) |
+| Others | 98,838 | Gene associations, variants, etc. |
 
-```bash
-# Clone repository
-git clone https://github.com/wangjl99/rdkg.git
-cd rare-disease-kg
+## 🗄️ Data Sources
 
-# Install dependencies
-pip install -r requirements.txt
+- **[Orphanet](https://www.orpha.net/)**: Rare disease classifications and phenotypes
+- **[MONDO](http://obofoundry.org/ontology/mondo.html)**: Disease ontology integration
+- **[HPO](https://hpo.jax.org/)**: Human Phenotype Ontology
+- **[DrugBank](https://go.drugbank.com/)**: Drug information and treatments
+- **[ClinVar](https://www.ncbi.nlm.nih.gov/clinvar/)**: Genetic variant data
+- **[MAXO](https://github.com/monarch-initiative/MAxO)**: Medical Action Ontology
 
-# Load RDF data
-python scripts/load_blazegraph.py --rdf data/rdkg_complete.ttl
-```
+## 🚀 Quick Start
 
-### **Option 3: Public SPARQL Endpoint**
+### Prerequisites
 
-Access our public endpoint (available after Month 12 submission):
-```
-https://rdkg.uth.tmc.edu/sparql
-```
+- Docker and Docker Compose
+- 8GB RAM minimum (16GB recommended)
+- 10GB disk space
 
----
-
-## 📁 **Repository Structure**
-
-```
-rare-disease-kg/
-├── README.md                          # This file
-├── LICENSE                            # CC BY 4.0 license
-├── CITATION.cff                       # Citation metadata
-├── docker/
-│   ├── Dockerfile                     # Docker image definition
-│   ├── docker-compose.yml             # Multi-container setup
-│   └── blazegraph.properties          # Blazegraph configuration
-├── data/
-│   ├── rdkg_complete.ttl              # Full RDF graph (Turtle)
-│   ├── rdkg_complete.nt               # N-Triples format
-│   ├── rdkg_complete.rdf              # RDF/XML format
-│   ├── rdkg_complete.jsonld           # JSON-LD format
-│   └── metadata/
-│       ├── void.ttl                   # VoID metadata
-│       └── provenance.ttl             # Provenance information
-├── ontologies/
-│   ├── ordo.owl                       # Orphanet Rare Disease Ontology
-│   ├── mondo.owl                      # Mondo Disease Ontology
-│   ├── hp.owl                         # Human Phenotype Ontology
-│   └── maxo.owl                       # Medical Action Ontology
-├── scripts/
-│   ├── extract_ontologies.py         # OWL to RDF extraction
-│   ├── standardize_chemicals.py      # DrugBank→PubChem conversion
-│   ├── load_blazegraph.py            # Load data to Blazegraph
-│   ├── validate_rdf.py               # RDF validation
-│   └── llm_extraction/
-│       ├── extract_relationships.py  # LLM-based extraction
-│       └── validate_annotations.py   # Expert validation
-├── queries/
-│   ├── diagnosis_support.rq          # Phenotype similarity queries
-│   ├── drug_repurposing.rq           # Treatment discovery
-│   ├── gene_prioritization.rq        # Gene-disease queries
-│   └── README.md                      # Query documentation
-├── docs/
-│   ├── SCHEMA.md                      # Knowledge graph schema
-│   ├── ONTOLOGIES.md                  # Ontology alignment
-│   ├── API_GUIDE.md                   # SPARQL endpoint usage
-│   └── TUTORIALS.md                   # Step-by-step examples
-├── validation/
-│   ├── quality_metrics.json          # Data quality report
-│   ├── test_queries.rq               # Validation queries
-│   └── benchmark_results.json        # Performance benchmarks
-└── requirements.txt                   # Python dependencies
-```
-
----
-
-## 🏗️ **Knowledge Graph Schema**
-
-### **Core Entity Types**
-
-```turtle
-@prefix rdkg: <http://rdaccelerate.org/ontology/> .
-@prefix ordo: <http://www.orpha.net/ORDO/> .
-@prefix mondo: <http://purl.obolibrary.org/obo/MONDO_> .
-@prefix hp: <http://purl.obolibrary.org/obo/HP_> .
-@prefix hgnc: <https://www.genenames.org/data/gene-symbol-report/#!/hgnc_id/> .
-@prefix maxo: <http://purl.obolibrary.org/obo/MAXO_> .
-
-# Disease
-ordo:Orpha_521 a rdkg:RareDisease ;
-    rdfs:label "Chronic Myeloid Leukemia" ;
-    rdkg:has_mondo_id mondo:0011996 ;
-    rdkg:has_phenotype hp:0001909 ;
-    rdkg:has_gene hgnc:613 ;
-    rdkg:has_treatment maxo:0000058 .
-
-# Gene
-hgnc:613 a rdkg:Gene ;
-    rdfs:label "ABL1" ;
-    rdkg:associated_with ordo:Orpha_521 .
-
-# Phenotype
-hp:0001909 a rdkg:Phenotype ;
-    rdfs:label "Leukocytosis" ;
-    rdkg:observed_in ordo:Orpha_521 .
-
-# Treatment
-maxo:0000058 a rdkg:Treatment ;
-    rdfs:label "Pharmacotherapy" ;
-    rdkg:treats ordo:Orpha_521 ;
-    rdkg:has_drug drugbank:DB00619 .
-```
-
-### **Relationship Types**
-
-| Relationship | Domain | Range | Example |
-|-------------|---------|-------|---------|
-| `rdkg:has_phenotype` | Disease | Phenotype | CML has_phenotype Leukocytosis |
-| `rdkg:has_gene` | Disease | Gene | CML has_gene ABL1 |
-| `rdkg:has_treatment` | Disease | Treatment | CML has_treatment Imatinib |
-| `rdkg:treats` | Treatment | Disease | Imatinib treats CML |
-| `rdkg:prevents` | Treatment | Disease | Aspirin prevents MI |
-| `rdkg:contraindicated_for` | Treatment | Disease | Aspirin contraindicated_for Hemophilia |
-| `rdkg:resistant_to` | Disease | Treatment | CML-T315I resistant_to Imatinib |
-
-Full schema documentation: [docs/SCHEMA.md](docs/SCHEMA.md)
-
----
-
-## 📖 **Data Sources & Provenance**
-
-### **Ontologies Integrated**
-
-| Ontology | Version | Release Date | Entities | Purpose |
-|----------|---------|--------------|----------|---------|
-| **ORDO** | v4.3 | 2024-10-15 | 11,074 diseases | Rare disease classification |
-| **Mondo** | v2024-09-03 | 2024-09-03 | Harmonization | Disease ID mapping |
-| **HPO** | v2024-10-02 | 2024-10-02 | 8,600 phenotypes | Clinical features |
-| **HGNC** | 2024-10-01 | 2024-10-01 | 4,485 genes | Gene nomenclature |
-| **MAxO** | v1.2.0 | 2024-08-15 | 1,902 actions | Medical treatments |
-| **CHEBI** | v235 | 2024-09-01 | Chemical entities | Drug structure |
-
-### **External Databases**
-
-- **DrugBank** v5.1.10: Drug-disease relationships (2,070 drugs → PubChem CIDs)
-- **CTD** v2024-08: Chemical-disease associations
-- **MeSH** 2024: Biomedical indexing terms
-- **ClinVar** 2024-09: Genetic variant annotations
-- **PubChem**: Chemical entity identifiers (97% conversion success)
-
-### **Extraction Methods**
-
-1. **Ontology Parsing**: owlready2 (Python)
-2. **LLM Extraction**: GPT-4 via OntoGPT/SPIRES (95.6% coverage, 706 case reports)
-3. **Manual Curation**: Expert-validated (Monarch Initiative standards)
-4. **Chemical Standardization**: UniChem bulk mapping + PubChem API
-
-Full provenance: [data/metadata/provenance.ttl](data/metadata/provenance.ttl)
-
----
-
-## 🔍 **Example SPARQL Queries**
-
-### **Query 1: Find Treatments for Disease**
-
-```sparql
-PREFIX rdkg: <http://rdaccelerate.org/ontology/>
-PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
-
-SELECT ?diseaseName ?treatmentName ?drugName
-WHERE {
-  ?disease rdfs:label "Chronic Myeloid Leukemia" ;
-           rdkg:has_treatment ?treatment .
-  ?treatment rdfs:label ?treatmentName ;
-             rdkg:has_drug ?drug .
-  ?drug rdfs:label ?drugName .
-}
-```
-
-### **Query 2: Phenotype Similarity Search**
-
-```sparql
-PREFIX rdkg: <http://rdaccelerate.org/ontology/>
-PREFIX hp: <http://purl.obolibrary.org/obo/HP_>
-
-SELECT ?disease1 ?disease2 (COUNT(?phenotype) as ?similarity)
-WHERE {
-  ?disease1 rdkg:has_phenotype hp:0002094 .  # Progressive dyspnea
-  ?disease1 rdkg:has_phenotype ?phenotype .
-  ?disease2 rdkg:has_phenotype ?phenotype .
-  FILTER (?disease1 != ?disease2)
-}
-GROUP BY ?disease1 ?disease2
-HAVING (COUNT(?phenotype) >= 3)
-ORDER BY DESC(?similarity)
-```
-
-More queries: [queries/README.md](queries/README.md)
-
----
-
-## 🐳 **Docker Deployment**
-
-### **Quick Start**
+### Option 1: Neo4j Graph Database
 
 ```bash
-# Build image
-docker build -t rdkg:latest docker/
+# Start Neo4j
+docker-compose up -d neo4j
 
-# Run with docker-compose
+# Access Neo4j Browser
+open http://localhost:7474
+
+# Login: neo4j / rdaccelerate2024
+```
+
+### Option 2: SPARQL Endpoint
+
+```bash
+# Start Fuseki
+docker-compose up -d fuseki
+
+# Access Fuseki UI
+open http://localhost:3030
+
+# Login: admin / rdaccelerate2024
+```
+
+### Option 3: Both Services
+
+```bash
+# Start everything
 docker-compose up -d
 
-# Check status
-docker ps
-
-# View logs
-docker logs rdkg-blazegraph
+# Neo4j: http://localhost:7474
+# Fuseki: http://localhost:3030
 ```
 
-### **Configuration**
+## 📖 Documentation
 
-Edit `docker/blazegraph.properties`:
-```properties
-com.bigdata.journal.AbstractJournal.file=/var/lib/blazegraph/blazegraph.jnl
-com.bigdata.journal.AbstractJournal.bufferMode=DiskRW
-com.bigdata.namespace.kb.lex.com.bigdata.btree.BTree.branchingFactor=1024
+- **[Setup Guide](docs/SETUP.md)** - Detailed installation and configuration
+- **[Schema Documentation](docs/SCHEMA.md)** - Knowledge graph structure and ontologies
+- **[Cypher Queries](docs/CYPHER_QUERIES.md)** - Neo4j query examples
+- **[SPARQL Queries](docs/SPARQL_QUERIES.md)** - RDF query examples
+- **[API Guide](docs/API_GUIDE.md)** - Programmatic access patterns
+- **[Data Statistics](docs/DATA_STATISTICS.md)** - Detailed entity and relationship counts
+
+## 🔍 Example Queries
+
+### Neo4j Cypher
+
+```cypher
+// Find diseases with most phenotypes
+MATCH (d:Disease)-[:HAS_PHENOTYPE]->(p:Phenotype)
+RETURN d.name, count(p) as phenotype_count
+ORDER BY phenotype_count DESC
+LIMIT 10;
 ```
 
-Full Docker guide: [docs/DOCKER_GUIDE.md](docs/DOCKER_GUIDE.md)
+### SPARQL
 
----
+```sparql
+PREFIX biolink: <https://w3id.org/biolink/vocab/>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
 
-## 📊 **Data Quality Metrics**
+SELECT ?disease_name (COUNT(?phenotype) AS ?count)
+WHERE {
+  ?disease a biolink:Disease ;
+           rdfs:label ?disease_name ;
+           biolink:has_phenotype ?phenotype .
+}
+GROUP BY ?disease_name
+ORDER BY DESC(?count)
+LIMIT 10
+```
 
-| Metric | Value | Target | Status |
-|--------|-------|--------|--------|
-| **RDF Triple Validity** | 100% | 100% | ✅ |
-| **Ontology Term Coverage** | 98.5% | >95% | ✅ |
-| **Identifier Mapping** | 97% | >90% | ✅ |
-| **Zero Orphaned Nodes** | 0 | 0 | ✅ |
-| **FAIR Score** | 4.2/5 | >4.0 | ✅ |
-| **Query Response Time** | <500ms | <1s | ✅ |
+## 🏗️ Architecture
 
-Detailed report: [validation/quality_metrics.json](validation/quality_metrics.json)
+```
+┌─────────────────────────────────────────────────────────────┐
+│                    Data Sources                              │
+│  Orphanet │ MONDO │ HPO │ DrugBank │ ClinVar │ MAXO        │
+└──────────────────────┬──────────────────────────────────────┘
+                       │
+                       ▼
+┌─────────────────────────────────────────────────────────────┐
+│                  MySQL Database                              │
+│              (Source data integration)                       │
+└──────────────────────┬──────────────────────────────────────┘
+                       │
+          ┌────────────┴────────────┐
+          ▼                         ▼
+┌──────────────────┐      ┌──────────────────┐
+│   Neo4j Graph    │      │   RDF Triples    │
+│   (Cypher)       │      │   (Turtle/NT)    │
+└────────┬─────────┘      └────────┬─────────┘
+         │                         │
+         ▼                         ▼
+┌──────────────────┐      ┌──────────────────┐
+│  Neo4j Browser   │      │ Apache Fuseki    │
+│  localhost:7474  │      │  localhost:3030  │
+└──────────────────┘      └──────────────────┘
+```
 
----
+## 🔗 Integration
 
-## 🤝 **Contributing**
+### FRINK Open Knowledge Network
 
-We welcome contributions! Please see [CONTRIBUTING.md](CONTRIBUTING.md) for:
+This knowledge graph is designed for integration with the [FRINK Open Knowledge Network](https://github.com/frink-okn).
 
-- Code style guidelines
-- How to submit issues
-- Pull request process
-- Curation standards
+**SPARQL Endpoint**: `http://your-server:3030/rdaccelerate/sparql`
 
-### **Areas for Contribution**
+### API Access
 
-- 🧬 Additional disease-gene associations
-- 💊 New drug-disease relationships
-- 🔬 Clinical trial mappings
-- 📝 Documentation improvements
-- 🐛 Bug reports and fixes
+**Neo4j Bolt Protocol**:
+```python
+from neo4j import GraphDatabase
 
----
+driver = GraphDatabase.driver(
+    "bolt://localhost:7687",
+    auth=("neo4j", "rdaccelerate2024")
+)
+```
 
-## 📄 **License**
+**SPARQL HTTP API**:
+```python
+import requests
 
-This work is licensed under [Creative Commons Attribution 4.0 International (CC BY 4.0)](https://creativecommons.org/licenses/by/4.0/).
+query = """
+PREFIX biolink: <https://w3id.org/biolink/vocab/>
+SELECT * WHERE { ?s a biolink:Disease } LIMIT 10
+"""
 
-### **Citation**
+response = requests.post(
+    "http://localhost:3030/rdaccelerate/sparql",
+    data={"query": query},
+    headers={"Accept": "application/json"},
+    auth=("admin", "rdaccelerate2024")
+)
+```
+
+## 📦 Docker Images
+
+- **Neo4j**: `neo4j:5.15.0` with APOC plugin
+- **Fuseki**: `stain/jena-fuseki:latest`
+
+## 🛠️ Data Import Scripts
+
+Import scripts are provided for:
+- CSV export from MySQL
+- Neo4j bulk import
+- RDF conversion and export
+- Fuseki dataset creation
+
+See `scripts/` directory for details.
+
+## 📊 Data Quality
+
+**Quality Assurance Measures**:
+- ✅ No duplicate relationships (deduplicated 151,304 duplicates)
+- ✅ All relationship directions verified (fixed 151,304 backwards edges)
+- ✅ Biolink Model compliance (all types standardized)
+- ✅ Entity type consistency (Drug vs Treatment properly distinguished)
+- ✅ Referential integrity (all edges reference valid nodes)
+
+## 🤝 Contributing
+
+We welcome contributions! Please see [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
+
+## 📝 Citation
+
+If you use this knowledge graph in your research, please cite:
 
 ```bibtex
-@software{rdkg2025,
-  title = {Rare Disease Knowledge Graph (RDKG)},
-  author = {Liu, Hongfang and Wang, Jinlian and Li, Xin},
-  year = {2025},
-  institution = {UTHealth Houston, McWilliams School of Biomedical Informatics},
-  doi = {10.5281/zenodo.XXXXXXX},
-  url = {https://github.com/UTHealth-SBMI/rare-disease-kg}
+@misc{rdaccelerate2024,
+  title={RDKG Rare Disease Knowledge Graph},
+  author={UTHealth Houston},
+  year={2024},
+  publisher={GitHub},
+  url={https://github.com/wangjl99/RDKG}
 }
 ```
 
----
+## 📄 License
 
-## 👥 **Team**
+This project is licensed under the MIT License - see [LICENSE](LICENSE) file for details.
 
-**Principal Investigator:**
-- Dr. Hongfang Liu, PhD, FACMI - Vice President of Learning Health System, UTHealth Houston
+## 🏥 Institutional Affiliation
 
-**Co-Investigator:**
-- Dr. Jinlian Wang - Assistant Professor, McWilliams School of Biomedical Informatics
+**UTHealth Houston**  
+School of Biomedical Informatics
 
-**Data Scientist:**
-- Dr. Xin Li - LLM-based information extraction and semantic web technologies
+## 📧 Contact
 
----
+For questions or collaborations:
+- Open an issue on GitHub
+- Email: [your-email@uth.tmc.edu]
 
-## 🔗 **Links**
+## 🙏 Acknowledgments
 
-- **Documentation**: https://rdkg.uth.tmc.edu/docs
-- **SPARQL Endpoint**: https://rdkg.uth.tmc.edu/sparql
-- **Issue Tracker**: https://github.com/UTHealth-SBMI/rare-disease-kg/issues
-- **Proto-OKN Registry**: https://protoOKN.net (after Month 12 submission)
-- **Contact**: hongfang.liu@uth.tmc.edu, jinlian.wang@uth.tmc.edu
-
----
-
-## 📊 **Funding**
-
-This work is supported by:
-- NIH Grant R01 HG012748: "Learning Precision Medicine for Rare Diseases Empowered by Knowledge-driven Data Mining"
-- NSF Proto-OKN Integration Award
+- Orphanet for rare disease data
+- Monarch Initiative for ontology development
+- Biolink Model community for standardization
+- Neo4j and Apache Jena teams for database technologies
 
 ---
 
-## 🎯 **Project Status**
-
-- [x] **Months 1-2**: RDF Conversion & Ontology Alignment
-- [x] **Months 3-4**: Query Infrastructure & Metadata
-- [x] **Months 5-6**: Documentation & Code Release
-- [x] **Months 7-10**: Community Testing (Current Phase)
-- [ ] **Months 11-12**: Final Submission to Proto-OKN (Q1 2026)
-
-Last Updated: December 2025
+**Last Updated**: April 2026  
+**Version**: 1.0.0

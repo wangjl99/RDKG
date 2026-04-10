@@ -1,81 +1,60 @@
 version: '3.8'
 
 services:
-  # Blazegraph RDF Triplestore
-  blazegraph:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    container_name: rdkg-blazegraph
+  # ========================================
+  # Neo4j Graph Database
+  # ========================================
+  neo4j:
+    image: neo4j:5.15.0
+    container_name: rdaccelerate-neo4j
     ports:
-      - "9999:9999"  # Blazegraph web interface
+      - "7474:7474"  # HTTP
+      - "7687:7687"  # Bolt
     environment:
-      - JAVA_OPTS=-Xmx4g -Xms2g
-      - BLAZEGRAPH_PORT=9999
+      - NEO4J_AUTH=neo4j/rdaccelerate2024
+      - NEO4J_PLUGINS=["apoc"]
+      - NEO4J_dbms_memory_heap_initial__size=2G
+      - NEO4J_dbms_memory_heap_max__size=4G
+      - NEO4J_dbms_memory_pagecache_size=2G
+      - NEO4J_db_transaction_timeout=10m
+      - NEO4J_apoc_export_file_enabled=true
+      - NEO4J_apoc_import_file_enabled=true
+      - NEO4J_apoc_import_file_use__neo4j__config=true
     volumes:
-      - blazegraph-data:/var/lib/blazegraph
-      - ./data:/data:ro  # Mount data directory as read-only
-      - ./logs:/var/log/blazegraph
+      - ./neo4j_data:/data
+      - ./neo4j_logs:/logs
+      - ./neo4j_export:/var/lib/neo4j/import
+      - ./neo4j_plugins:/plugins
     restart: unless-stopped
     networks:
-      - rdkg-network
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:9999/blazegraph/status"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 60s
+      - rdaccelerate-network
 
-  # Optional: SPARQL Query Interface (Yasgui)
-  yasgui:
-    image: erikap/yasgui:latest
-    container_name: rdkg-yasgui
+  # ========================================
+  # Apache Jena Fuseki SPARQL Endpoint
+  # ========================================
+  fuseki:
+    image: stain/jena-fuseki:latest
+    container_name: rdaccelerate-fuseki
     ports:
-      - "8080:80"
+      - "3030:3030"
     environment:
-      - DEFAULT_SPARQL_ENDPOINT=http://blazegraph:9999/blazegraph/sparql
-    depends_on:
-      - blazegraph
-    networks:
-      - rdkg-network
-    restart: unless-stopped
-
-  # Optional: RDF Data Loader (runs once to load data)
-  data-loader:
-    image: openjdk:11-jre-slim
-    container_name: rdkg-loader
+      - ADMIN_PASSWORD=rdaccelerate2024
+      - JVM_ARGS=-Xmx4g
     volumes:
-      - ./data:/data:ro
-      - ./scripts:/scripts:ro
-    depends_on:
-      blazegraph:
-        condition: service_healthy
+      - ./fuseki_data:/fuseki
+      - ./rdf_data:/staging
+    restart: unless-stopped
     networks:
-      - rdkg-network
-    command: >
-      sh -c "
-        echo 'Waiting for Blazegraph to be ready...' &&
-        sleep 30 &&
-        echo 'Loading RDF data...' &&
-        curl -X POST 
-          -H 'Content-Type: text/turtle' 
-          --data-binary '@/data/rdkg_complete.ttl' 
-          http://blazegraph:9999/blazegraph/sparql &&
-        echo 'Data loading completed!'
-      "
-    restart: "no"
-
-volumes:
-  blazegraph-data:
-    driver: local
+      - rdaccelerate-network
 
 networks:
-  rdkg-network:
+  rdaccelerate-network:
     driver: bridge
 
-# Usage:
-# 1. Start all services: docker-compose up -d
-# 2. Access Blazegraph: http://localhost:9999/blazegraph
-# 3. Access Yasgui: http://localhost:8080
-# 4. Stop services: docker-compose down
-# 5. Remove volumes: docker-compose down -v
+volumes:
+  neo4j_data:
+  neo4j_logs:
+  neo4j_export:
+  neo4j_plugins:
+  fuseki_data:
+  rdf_data:
