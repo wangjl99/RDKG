@@ -1,6 +1,7 @@
 # Data Files
 
-The RDKG contains **72,368 entities** and **834,260 relationships**. Due to file size, data files are not included in this repository.
+The RDKG contains  Nodes: 72,368 (Disease: 26,106 | Phenotype: 11,709 | Gene: 9,326 | Drug: 16,875 | Variant: 7,367)
+Edges: 834,260 (HAS_PHENOTYPE: 328,753 | TREATS: 39,043 | CONTRAINDICATED_FOR: 61,351 | SUBCLASS_OF: 142,047 | ...) Due to file size, data files are not included in this repository.
 
 ## 📊 Statistics
 
