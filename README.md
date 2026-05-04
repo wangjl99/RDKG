@@ -252,7 +252,7 @@ School of Biomedical Informatics
 
 For questions or collaborations:
 - Open an issue on GitHub
-- Email: [your-email@uth.tmc.edu]
+- Email: [dada.bio2014@gmail.com]
 
 ## 🙏 Acknowledgments
 
